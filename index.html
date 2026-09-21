@@ -3,16 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>Las Leyendas de la CUM</title>
-    <!-- Importamos la fuente pixelada de Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <!-- Conectamos nuestro archivo de estilos -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- (El resto de tu body se queda exactamente igual) -->
-    <h1>Las Leyendas de la CUM</h1>
     
-    <main id="lore-container"></main>
+    <!-- PANTALLA 1: LA PORTADA -->
+    <div id="portada">
+        <h1>LAS LEYENDAS DE CUM</h1>
+        <button id="btn-comenzar">Comenzar a leer</button>
+    </div>
+
+    <!-- PANTALLA 2: EL LECTOR (Oculto al principio) -->
+    <div id="lector" class="oculto">
+        <!-- Panel izquierdo (Índice) -->
+        <aside id="sidebar">
+            <button id="btn-volver">← Volver a la portada</button>
+            
+            <h2>Índice</h2>
+            <nav>
+                <!-- Categoría 1: Los Capítulos -->
+                <div class="categoria-indice">
+                    <h3>Capítulos</h3>
+                    <ul id="lista-capitulos">
+                        <!-- JS inyectará los capítulos aquí -->
+                    </ul>
+                </div>
+
+                <!-- Categoría 2: Personajes (Preparado para el futuro) -->
+                <div class="categoria-indice">
+                    <h3>Personajes</h3>
+                    <ul id="lista-personajes">
+                        <li><span class="proximamente">Próximamente...</span></li>
+                    </ul>
+                </div>
+
+                <!-- Categoría 3: Lugares (Preparado para el futuro) -->
+                <div class="categoria-indice">
+                    <h3>Lugares</h3>
+                    <ul id="lista-lugares">
+                        <li><span class="proximamente">Próximamente...</span></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+        
+        <!-- Panel derecho (Capítulo) -->
+        <main id="pantalla-capitulo">
+            <!-- JavaScript inyectará aquí el texto -->
+        </main>
+    </div>
 
     <script src="script.js"></script>
 </body>

@@ -5,70 +5,97 @@ const archivosCapitulos = [
     './chapters/chap4.json'
 ];
 
+let historiaCompleta = [];
+const numerosRomanos = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+
+// --- CONTROL DE PANTALLAS ---
+const btnComenzar = document.getElementById('btn-comenzar');
+const btnVolver = document.getElementById('btn-volver'); // Capturamos el nuevo botón
+const pantallaPortada = document.getElementById('portada');
+const pantallaLector = document.getElementById('lector');
+
+// Botón de ir al libro
+btnComenzar.addEventListener('click', () => {
+    pantallaPortada.classList.add('oculto'); 
+    pantallaLector.classList.remove('oculto'); 
+});
+
+// Botón de volver a la portada
+btnVolver.addEventListener('click', () => {
+    pantallaLector.classList.add('oculto'); 
+    pantallaPortada.classList.remove('oculto'); 
+});
+
+
+// --- LÓGICA DE DATOS ---
 async function cargarLore() {
-    const contenedor = document.getElementById('lore-container');
+    const listaCapitulos = document.getElementById('lista-capitulos');
 
-    // --- 1. CREAMOS EL ÍNDICE AL PRINCIPIO ---
-    const navIndice = document.createElement('nav');
-    navIndice.id = 'indice-capitulos';
-    
-    const tituloIndice = document.createElement('h2');
-    tituloIndice.textContent = 'Índice de Leyendas';
-    navIndice.appendChild(tituloIndice);
-
-    const listaIndice = document.createElement('ul');
-    navIndice.appendChild(listaIndice);
-
-    // Lo inyectamos en el HTML antes de cargar los textos
-    contenedor.appendChild(navIndice);
-
-    // Un separador para dividir el índice del primer capítulo
-    contenedor.appendChild(document.createElement('hr'));
-
-
-    // --- 2. CARGAMOS LOS CAPÍTULOS ---
-    // Usamos un bucle tradicional (let i = 0...) para saber por qué número de capítulo vamos
     for (let i = 0; i < archivosCapitulos.length; i++) {
-        const respuesta = await fetch(archivosCapitulos[i]);
-        const chapter = await respuesta.json();
+        try {
+            const respuesta = await fetch(archivosCapitulos[i]);
+            if (!respuesta.ok) throw new Error(`Error ${respuesta.status}`);
+            const chapter = await respuesta.json();
+            
+            historiaCompleta.push(chapter);
 
-        // Creamos un identificador único, ej: "capitulo-1"
-        const idAncla = `capitulo-${i + 1}`;
+            // Creamos el enlace en el panel izquierdo
+            const li = document.createElement('li');
+            const enlace = document.createElement('a');
+            enlace.href = "#";
+            enlace.textContent = chapter.title;
+            
+            enlace.addEventListener('click', (evento) => {
+                evento.preventDefault();
+                mostrarCapitulo(i);
+            });
 
-        // Añadimos el enlace de este capítulo a la lista del índice
-        const li = document.createElement('li');
-        const enlace = document.createElement('a');
-        enlace.href = `#${idAncla}`; // Esto hace que el enlace baje hasta el id
-        enlace.textContent = chapter.title;
-        
-        li.appendChild(enlace);
-        listaIndice.appendChild(li);
+            li.appendChild(enlace);
+            listaCapitulos.appendChild(li);
 
-        // Creamos el artículo y LE PONEMOS EL ID para que el enlace lo encuentre
-        const article = document.createElement('article');
-        article.id = idAncla; 
-
-        // Creamos el título
-        const titulo = document.createElement('h2');
-        titulo.textContent = chapter.title;
-        article.appendChild(titulo);
-
-        // Recorremos los párrafos
-        chapter.paragraphs.forEach(texto => {
-            const parrafo = document.createElement('p');
-            parrafo.textContent = texto;
-            article.appendChild(parrafo);
-        });
-
-        // Añadimos el capítulo al contenedor principal
-        contenedor.appendChild(article);
-        
-        // Añadimos un separador (excepto si es el último capítulo)
-        if (i < archivosCapitulos.length - 1) {
-            const separador = document.createElement('hr');
-            contenedor.appendChild(separador);
+        } catch (error) {
+            console.error(`🚨 Error cargando ${archivosCapitulos[i]}:`, error);
         }
+    }
+
+    if (historiaCompleta.length > 0) {
+        mostrarCapitulo(0);
     }
 }
 
+function mostrarCapitulo(indice) {
+    const pantalla = document.getElementById('pantalla-capitulo');
+    pantalla.innerHTML = ''; 
+    
+    const chapter = historiaCompleta[indice];
+
+    // Marcamos el activo en el panel izquierdo
+    const enlaces = document.querySelectorAll('.categoria-indice a');
+    enlaces.forEach(a => a.classList.remove('capitulo-activo'));
+    enlaces[indice].classList.add('capitulo-activo');
+
+    const article = document.createElement('article');
+
+    // Añadimos el texto "Capítulo X" justo encima
+    const etiqueta = document.createElement('p');
+    etiqueta.className = 'etiqueta-capitulo';
+    etiqueta.textContent = `Capítulo ${numerosRomanos[indice] || (indice + 1)}`;
+    article.appendChild(etiqueta);
+
+    // El título real del JSON
+    const titulo = document.createElement('h2');
+    titulo.textContent = chapter.title;
+    article.appendChild(titulo);
+
+    // Los párrafos
+    chapter.paragraphs.forEach(texto => {
+        const parrafo = document.createElement('p');
+        parrafo.textContent = texto;
+        article.appendChild(parrafo);
+    });
+
+    pantalla.appendChild(article);
+}
+
+// Iniciamos la descarga de datos en segundo plano mientras el usuario ve la portada
 cargarLore();
