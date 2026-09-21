@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lore de mi Mundo - Lector</title>
+    
+    <!-- Tailwind CSS para los estilos base -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fuentes de Google: VT323 (pixelada para títulos) y Lora (serif elegante para lectura) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        /* Variables y configuración general */
+        :root {
+            --mc-dark: #121212;
+            --mc-panel: #1e1e24;
+            --mc-border-light: #4b4b4b;
+            --mc-border-dark: #000000;
+            --mc-highlight: #55ff55; /* Verde XP de Minecraft */
+        }
+
+        body {
+            background-color: var(--mc-dark);
+            color: #d1d5db;
+            font-family: 'Lora', serif; /* Fuente de lectura por defecto */
+            overflow: hidden; /* Evitamos scroll general, lo manejaremos internamente */
+        }
+
+        /* Clases de fuentes específicas */
+        .font-pixel {
+            font-family: 'VT323', monospace;
+        }
+
+        /* Estilo de bloques tipo interfaz de Minecraft (borde claro arriba/izq, oscuro abajo/der) */
+        .mc-panel {
+            background-color: var(--mc-panel);
+            border-top: 3px solid var(--mc-border-light);
+            border-left: 3px solid var(--mc-border-light);
+            border-bottom: 3px solid var(--mc-border-dark);
+            border-right: 3px solid var(--mc-border-dark);
+        }
+
+        /* Estilo para los botones del índice */
+        .chapter-btn {
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .chapter-btn:hover {
+            background-color: #2a2a35;
+            border-left-color: var(--mc-highlight);
+            padding-left: 1rem;
+        }
+        .chapter-btn.active {
+            background-color: #2a2a35;
+            color: var(--mc-highlight);
+            border-left-color: var(--mc-highlight);
+            font-weight: bold;
+        }
+
+        /* Scrollbar personalizado estilo bloque */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--mc-dark);
+            border-left: 2px solid var(--mc-border-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #555;
+            border: 2px solid var(--mc-border-light);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        /* Animaciones de transición de página */
+        .fade-transition {
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-out;
+        }
+        .fade-out {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Formato enriquecido para el texto del lore (párrafos, citas, etc) */
+        .prose p {
+            margin-bottom: 1.25rem;
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+        .prose blockquote {
+            border-left: 4px solid var(--mc-highlight);
+            padding-left: 1rem;
+            font-style: italic;
+            color: #9ca3af;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+        }
+        .prose h2 {
+            font-family: 'VT323', monospace;
+            font-size: 2rem;
+            color: #fff;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="h-screen w-full flex flex-col md:flex-row">
+
+    <!-- Menú hamburguesa para móviles -->
+    <div class="md:hidden bg-neutral-900 p-4 border-b-4 border-black flex justify-between items-center z-50">
+        <h1 class="font-pixel text-2xl text-white">Libro de Lore</h1>
+        <button id="mobile-menu-btn" class="p-2 bg-neutral-800 border-2 border-gray-600 text-white font-pixel">MENU</button>
+    </div>
+
+    <!-- Barra lateral (Sidebar) -->
+    <aside id="sidebar" class="mc-panel w-full md:w-80 h-full flex flex-col fixed md:relative z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="p-6 pb-2 border-b-2 border-black">
+            <h1 class="font-pixel text-3xl text-emerald-400 mb-2 drop-shadow-md">Crónicas del Mundo</h1>
+            <p class="text-sm text-gray-400 italic">Selecciona un tomo para leer...</p>
+        </div>
+        
+        <!-- Lista de capítulos generada por JS -->
+        <div class="flex-1 overflow-y-auto p-4">
+            <ul id="chapter-list" class="space-y-2 font-pixel text-lg">
+                <!-- Los capítulos se insertarán aquí -->
+            </ul>
+        </div>
+        
+        <div class="p-4 border-t-2 border-gray-700 text-xs text-gray-500 text-center font-pixel">
+            V 1.0 - Archivos del Servidor
+        </div>
+    </aside>
+
+    <!-- Área principal de lectura -->
+    <main class="flex-1 h-full overflow-y-auto bg-[#121212] relative shadow-inner">
+        <!-- Contenedor del contenido centrado -->
+        <div class="max-w-3xl mx-auto px-6 py-12 md:py-20">
+            
+            <article id="reader-content" class="fade-transition fade-in">
+                <!-- Encabezado del capítulo -->
+                <header class="mb-10 border-b border-gray-800 pb-6">
+                    <div class="text-emerald-500 font-pixel text-xl mb-2 tracking-widest uppercase" id="chapter-subtitle">Tomo I</div>
+                    <h1 class="font-pixel text-4xl md:text-5xl text-white leading-tight" id="chapter-title">Cargando...</h1>
+                </header>
+
+                <!-- Texto del capítulo -->
+                <div class="prose text-gray-300" id="chapter-body">
+                    <!-- El texto se inyecta aquí -->
+                </div>
+            </article>
+            
+            <!-- Botones de navegación (Anterior / Siguiente) -->
+            <div class="mt-16 pt-6 border-t border-gray-800 flex justify-between font-pixel">
+                <button id="btn-prev" class="px-4 py-2 mc-panel hover:text-emerald-400 transition-colors hidden">
+                    &lt; Anterior
+                </button>
+                <button id="btn-next" class="px-4 py-2 mc-panel hover:text-emerald-400 transition-colors ml-auto hidden">
+                    Siguiente &gt;
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // 1. TUS DATOS DEL LORE (MODIFICA ESTO)
+        // ==========================================
+        // Aquí es donde escribirás tu historia. Cada objeto es un capítulo.
+        // Puedes usar etiquetas HTML básicas dentro de "content" como <p>, <blockquote>, <h2>, <strong>...
+        const loreChapters = [
+            {
+                title: "El Despertar en la Costa",
+                subtitle: "Capítulo 1",
+                content: `
+                    <p>La brisa marina fue lo primero que sintieron. No había recuerdos del viaje, solo el áspero roce de la arena bajo sus cuerpos pixelados y el sonido rítmico de las olas rompiendo contra bloques de grava.</p>
+                    <p>Al alzar la vista, el sol cuadrado se elevaba lentamente por el horizonte oriental, tiñendo el cielo de tonos anaranjados. Este era el <strong>Mundo Conocido</strong>, aunque para ellos, en ese momento, era un lienzo completamente en blanco.</p>
+                    <blockquote>"El primer día siempre es el más corto, y la primera noche, la más larga." — Adagio de los primeros constructores.</blockquote>
+                    <p>Antes de que cayera la noche, necesitaban madera. Ese instinto primitivo guiaba sus manos hacia los troncos de roble cercanos. Los puños golpearon la corteza hasta que el primer bloque cedió, flotando en el aire antes de ser recolectado. Así comenzó la era de la construcción.</p>
+                `
+            },
+            {
+                title: "El Pacto de Obsidiana",
+                subtitle: "Capítulo 2",
+                content: `
+                    <p>Meses después del asentamiento inicial, las sombras comenzaron a alargarse. Las cavernas profundas no solo albergaban diamantes, sino también horrores que no soportaban la luz de las antorchas.</p>
+                    <h2>La Primera Incursión</h2>
+                    <p>Fue durante una expedición minera al nivel -54. Los mineros picaban la pizarra profunda cuando un ruido perturbador, como huesos crujiendo y arcos tensándose, resonó en la oscuridad.</p>
+                    <p>Para proteger la ciudad de la superficie, los líderes decidieron forjar un muro impenetrable. Derramaron agua sobre pozos de lava viva, extrayendo la obsidiana resultante con paciencia y picos encantados.</p>
+                    <p>Ese muro hoy se conoce como <em>El Pacto de Obsidiana</em>, una cicatriz negra en el valle que marca la frontera entre el mundo iluminado y las profundidades olvidadas.</p>
+                `
+            },
+            {
+                title: "La Caída de Khal'Moria",
+                subtitle: "Capítulo 3",
+                content: `
+                    <p>Khal'Moria fue la joya arquitectónica subterránea. Un intrincado sistema de vías de vagonetas conectaba grandes salones iluminados con piedra luminosa traída del mismísimo inframundo.</p>
+                    <p>Pero la ambición los cegó. En su búsqueda de un mineral rojo que prometía energía ilimitada, despertaron algo antiguo. Los túneles colapsaron, y las vías quedaron abandonadas a la putrefacción y a las arañas tejedoras.</p>
+                    <p>Hoy en día, solo los aventureros más insensatos buscan las entradas ocultas a Khal'Moria, atraídos por las leyendas de cofres rebosantes de riquezas que descansan en sus salones silenciados.</p>
+                `
+            }
+        ];
+
+        // ==========================================
+        // 2. LÓGICA DE LA APLICACIÓN
+        // ==========================================
+        
+        let currentChapterIndex = 0;
+        
+        // Elementos del DOM
+        const chapterList = document.getElementById('chapter-list');
+        const readerContent = document.getElementById('reader-content');
+        const titleEl = document.getElementById('chapter-title');
+        const subtitleEl = document.getElementById('chapter-subtitle');
+        const bodyEl = document.getElementById('chapter-body');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+
+        // Inicializar el visor
+        function initApp() {
+            renderSidebar();
+            loadChapter(0, false); // Cargar sin animación al inicio
+            setupEventListeners();
+        }
+
+        // Crear la lista del índice lateral
+        function renderSidebar() {
+            chapterList.innerHTML = '';
+            
+            loreChapters.forEach((chapter, index) => {
+                const li = document.createElement('li');
+                const button = document.createElement('button');
+                
+                button.className = `w-full text-left py-2 px-3 chapter-btn ${index === currentChapterIndex ? 'active' : 'text-gray-400'}`;
+                button.innerHTML = `<span class="text-xs text-gray-500 mr-2">${index + 1}.</span> ${chapter.title}`;
+                
+                button.onclick = () => {
+                    if(currentChapterIndex !== index) {
+                        loadChapter(index);
+                        closeMobileMenu(); // Cierra el menú en móviles al seleccionar
+                    }
+                };
+                
+                li.appendChild(button);
+                chapterList.appendChild(li);
+            });
+        }
+
+        // Cargar un capítulo específico con animación
+        function loadChapter(index, animate = true) {
+            currentChapterIndex = index;
+            const chapter = loreChapters[index];
+
+            const updateContent = () => {
+                // Actualizar textos
+                subtitleEl.textContent = chapter.subtitle || `Capítulo ${index + 1}`;
+                titleEl.textContent = chapter.title;
+                bodyEl.innerHTML = chapter.content;
+
+                // Actualizar estado de botones de navegación
+                btnPrev.classList.toggle('hidden', index === 0);
+                btnNext.classList.toggle('hidden', index === loreChapters.length - 1);
+
+                // Hacer scroll arriba
+                document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Actualizar clases activas en el sidebar
+                renderSidebar();
+            };
+
+            if (animate) {
+                // Secuencia de fade out -> actualizar -> fade in
+                readerContent.classList.replace('fade-in', 'fade-out');
+                
+                setTimeout(() => {
+                    updateContent();
+                    readerContent.classList.replace('fade-out', 'fade-in');
+                }, 400); // Coincide con la duración del CSS (0.4s)
+            } else {
+                updateContent();
+            }
+        }
+
+        // Configurar botones de anterior/siguiente y menú móvil
+        function setupEventListeners() {
+            btnPrev.addEventListener('click', () => {
+                if (currentChapterIndex > 0) loadChapter(currentChapterIndex - 1);
+            });
+
+            btnNext.addEventListener('click', () => {
+                if (currentChapterIndex < loreChapters.length - 1) loadChapter(currentChapterIndex + 1);
+            });
+
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+        }
+
+        // Función auxiliar para cerrar menú en móviles
+        function closeMobileMenu() {
+            if (window.innerWidth < 768) { // 768px es el breakpoint 'md' de Tailwind
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        // Arrancar la app al cargar la ventana
+        window.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+</body>
+</html>
