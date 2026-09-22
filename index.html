@@ -8,49 +8,27 @@
 </head>
 <body>
     
-    <!-- PANTALLA 1: LA PORTADA -->
-    <div id="portada">
+    <!-- PANTALLA 1: PORTADA -->
+    <div id="cover-screen">
         <h1>LAS LEYENDAS DE CUM</h1>
-        <button id="btn-comenzar">Comenzar a leer</button>
+        <button id="btn-start">Comenzar a leer</button>
     </div>
 
-    <!-- PANTALLA 2: EL LECTOR (Oculto al principio) -->
-    <div id="lector" class="oculto">
-        <!-- Panel izquierdo (Índice) -->
+    <!-- PANTALLA 2: LECTOR -->
+    <div id="reader-screen" class="hidden">
+        
+        <!-- Panel izquierdo -->
         <aside id="sidebar">
-            <button id="btn-volver">← Volver a la portada</button>
-            
+            <button id="btn-back">← Volver a la portada</button>
             <h2>Índice</h2>
-            <nav>
-                <!-- Categoría 1: Los Capítulos -->
-                <div class="categoria-indice">
-                    <h3>Capítulos</h3>
-                    <ul id="lista-capitulos">
-                        <!-- JS inyectará los capítulos aquí -->
-                    </ul>
-                </div>
 
-                <!-- Categoría 2: Personajes (Preparado para el futuro) -->
-                <div class="categoria-indice">
-                    <h3>Personajes</h3>
-                    <ul id="lista-personajes">
-                        <li><span class="proximamente">Próximamente...</span></li>
-                    </ul>
-                </div>
-
-                <!-- Categoría 3: Lugares (Preparado para el futuro) -->
-                <div class="categoria-indice">
-                    <h3>Lugares</h3>
-                    <ul id="lista-lugares">
-                        <li><span class="proximamente">Próximamente...</span></li>
-                    </ul>
-                </div>
-            </nav>
+            <!-- JavaScript construye todas la categorías aquí -->
+            <nav id="sidebar-nav"></nav>
         </aside>
         
-        <!-- Panel derecho (Capítulo) -->
-        <main id="pantalla-capitulo">
-            <!-- JavaScript inyectará aquí el texto -->
+        <!-- Panel derecho-central -->
+        <main id="chapter-display">
+            <!-- JavaScript inyecta aquí el texto -->
         </main>
     </div>
 

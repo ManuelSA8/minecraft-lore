@@ -1,101 +1,155 @@
-const archivosCapitulos = [
-    './chapters/chap1.json',
-    './chapters/chap2.json',
-    './chapters/chap3.json',
-    './chapters/chap4.json'
+// --- CONFIGURACIÓN MAESTRA ---
+const loreConfig = [
+    {
+        id: 'chapters',
+        title: 'Capítulos',
+        labelPrefix: 'Capítulo',
+        useRoman: true,
+        files: [
+            './chapters/chap1.json',
+            './chapters/chap2.json',
+            './chapters/chap3.json',
+            './chapters/chap4.json'
+        ]
+    },
+    {
+        id: 'characters',
+        title: 'Personajes',
+        labelPrefix: '', 
+        useRoman: false,
+        files: []
+    },
+    {
+        id: 'locations',
+        title: 'Lugares',
+        labelPrefix: '',
+        useRoman: false,
+        files: []
+    }
 ];
 
-let historiaCompleta = [];
-const numerosRomanos = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+let storyData = {}; 
+const romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 
 // --- CONTROL DE PANTALLAS ---
-const btnComenzar = document.getElementById('btn-comenzar');
-const btnVolver = document.getElementById('btn-volver'); // Capturamos el nuevo botón
-const pantallaPortada = document.getElementById('portada');
-const pantallaLector = document.getElementById('lector');
+const btnStart = document.getElementById('btn-start');
+const btnBack = document.getElementById('btn-back');
+const coverScreen = document.getElementById('cover-screen');
+const readerScreen = document.getElementById('reader-screen');
 
-// Botón de ir al libro
-btnComenzar.addEventListener('click', () => {
-    pantallaPortada.classList.add('oculto'); 
-    pantallaLector.classList.remove('oculto'); 
+btnStart.addEventListener('click', () => {
+    coverScreen.classList.add('hidden'); 
+    readerScreen.classList.remove('hidden'); 
 });
 
-// Botón de volver a la portada
-btnVolver.addEventListener('click', () => {
-    pantallaLector.classList.add('oculto'); 
-    pantallaPortada.classList.remove('oculto'); 
+btnBack.addEventListener('click', () => {
+    readerScreen.classList.add('hidden'); 
+    coverScreen.classList.remove('hidden'); 
 });
 
+// --- LÓGICA DE CARGA DINÁMICA ---
+async function loadLore() {
+    const sidebarNav = document.getElementById('sidebar-nav');
 
-// --- LÓGICA DE DATOS ---
-async function cargarLore() {
-    const listaCapitulos = document.getElementById('lista-capitulos');
+    for (const category of loreConfig) {
+        
+        storyData[category.id] = [];
 
-    for (let i = 0; i < archivosCapitulos.length; i++) {
-        try {
-            const respuesta = await fetch(archivosCapitulos[i]);
-            if (!respuesta.ok) throw new Error(`Error ${respuesta.status}`);
-            const chapter = await respuesta.json();
-            
-            historiaCompleta.push(chapter);
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'index-category';
+        
+        const h3 = document.createElement('h3');
+        h3.textContent = category.title;
+        categoryDiv.appendChild(h3);
+        
+        const ul = document.createElement('ul');
+        categoryDiv.appendChild(ul);
+        sidebarNav.appendChild(categoryDiv);
 
-            // Creamos el enlace en el panel izquierdo
+        if (category.files.length === 0) {
             const li = document.createElement('li');
-            const enlace = document.createElement('a');
-            enlace.href = "#";
-            enlace.textContent = chapter.title;
-            
-            enlace.addEventListener('click', (evento) => {
-                evento.preventDefault();
-                mostrarCapitulo(i);
-            });
+            li.innerHTML = '<span class="coming-soon">Próximamente...</span>';
+            ul.appendChild(li);
+            continue; // Siguiente categoría
+        }
 
-            li.appendChild(enlace);
-            listaCapitulos.appendChild(li);
+        for (let i = 0; i < category.files.length; i++) {
+            try {
+                const response = await fetch(category.files[i]);
+                if (!response.ok) throw new Error(`Error ${response.status}`);
+                const data = await response.json();
+                
+                storyData[category.id].push(data);
 
-        } catch (error) {
-            console.error(`🚨 Error cargando ${archivosCapitulos[i]}:`, error);
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = "#";
+                link.textContent = data.title;
+                
+                // Evento para mostrar este contenido en concreto
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    showContent(category.id, i, link);
+                });
+
+                li.appendChild(link);
+                ul.appendChild(li);
+
+            } catch (error) {
+                console.error(`Error cargando ${category.files[i]}:`, error);
+            }
         }
     }
 
-    if (historiaCompleta.length > 0) {
-        mostrarCapitulo(0);
+    // Mostrar el "Capítulo I" por defecto (de moment, TODO)
+    if (storyData['chapters'] && storyData['chapters'].length > 0) {
+        const firstLink = sidebarNav.querySelector('a');
+        showContent('chapters', 0, firstLink);
     }
 }
 
-function mostrarCapitulo(indice) {
-    const pantalla = document.getElementById('pantalla-capitulo');
-    pantalla.innerHTML = ''; 
+// --- RENDERIZADO DE CONTENIDO ---
+function showContent(categoryId, itemIndex, activeLinkElement) {
+    const display = document.getElementById('chapter-display');
+    display.innerHTML = ''; 
     
-    const chapter = historiaCompleta[indice];
+    const content = storyData[categoryId][itemIndex];
+    
+    const config = loreConfig.find(c => c.id === categoryId);
 
-    // Marcamos el activo en el panel izquierdo
-    const enlaces = document.querySelectorAll('.categoria-indice a');
-    enlaces.forEach(a => a.classList.remove('capitulo-activo'));
-    enlaces[indice].classList.add('capitulo-activo');
+    document.querySelectorAll('.index-category a').forEach(link => {
+        link.classList.remove('active-chapter');
+    });
+    if (activeLinkElement) {
+        activeLinkElement.classList.add('active-chapter');
+    }
 
     const article = document.createElement('article');
 
-    // Añadimos el texto "Capítulo X" justo encima
-    const etiqueta = document.createElement('p');
-    etiqueta.className = 'etiqueta-capitulo';
-    etiqueta.textContent = `Capítulo ${numerosRomanos[indice] || (indice + 1)}`;
-    article.appendChild(etiqueta);
+    // Etiqueta
+    const label = document.createElement('p');
+    label.className = 'chapter-label';
+    if (config.useRoman) {
+        label.textContent = `${config.labelPrefix} ${romanNumerals[itemIndex] || (itemIndex + 1)}`;
+    } else {
+        label.textContent = config.labelPrefix;
+    }
+    article.appendChild(label);
 
-    // El título real del JSON
-    const titulo = document.createElement('h2');
-    titulo.textContent = chapter.title;
-    article.appendChild(titulo);
+    // Título principal
+    const title = document.createElement('h2');
+    title.textContent = content.title;
+    article.appendChild(title);
 
-    // Los párrafos
-    chapter.paragraphs.forEach(texto => {
-        const parrafo = document.createElement('p');
-        parrafo.textContent = texto;
-        article.appendChild(parrafo);
+    // Párrafos
+    content.paragraphs.forEach(text => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = text;
+        article.appendChild(paragraph);
     });
 
-    pantalla.appendChild(article);
+    display.appendChild(article);
 }
 
-// Iniciamos la descarga de datos en segundo plano mientras el usuario ve la portada
-cargarLore();
+// Iniciar la carga
+loadLore();
