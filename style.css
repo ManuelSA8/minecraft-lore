@@ -167,3 +167,21 @@ body {
     margin-bottom: 15px;
     text-align: justify;
 }
+
+/* Imagenes en texto */
+.image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 30px auto;
+    border: 4px solid #3A2318;
+    box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.5);
+    background-color: #000;
+}
+
+.picture {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 30px auto;
+}

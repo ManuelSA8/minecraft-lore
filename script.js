@@ -143,9 +143,21 @@ function showContent(categoryId, itemIndex, activeLinkElement) {
 
     // Párrafos
     content.paragraphs.forEach(text => {
-        const paragraph = document.createElement('p');
-        paragraph.textContent = text;
-        article.appendChild(paragraph);
+        if (text.startsWith('IMG:')) { // Imagen
+            const img = document.createElement('img');
+            img.src = text.substring(4);
+            img.className = 'image';
+            article.appendChild(img);
+        } else if (text.startsWith('PIC:')) { // Dibujo
+            const pic = document.createElement('img');
+            pic.src = text.substring(4);
+            pic.className = 'picture';
+            article.appendChild(pic);
+        } else {
+            const paragraph = document.createElement('p');
+            paragraph.textContent = text;
+            article.appendChild(paragraph);
+        }
     });
 
     display.appendChild(article);
