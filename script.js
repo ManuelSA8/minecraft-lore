@@ -6,6 +6,7 @@ const loreConfig = [
         labelPrefix: 'Capítulo',
         useRoman: true,
         files: [
+            // Capítulos
             './chapters/chap1.json',
             './chapters/chap2.json',
             './chapters/chap3.json',
@@ -19,7 +20,9 @@ const loreConfig = [
         title: 'Personajes',
         labelPrefix: '', 
         useRoman: false,
-        files: []
+        files: [
+            //'./characters/nulsa.json'
+        ]
     },
     {
         id: 'locations',
@@ -87,14 +90,16 @@ async function loadLore() {
                 const link = document.createElement('a');
                 link.href = "#";
 
-                const spanNum = document.createElement('span');
-                spanNum.className = 'nav-num';
-                spanNum.textContent = data.id + ".";
-
+                if (category.useRoman) {
+                    const spanNum = document.createElement('span');
+                    spanNum.className = 'nav-num';
+                    spanNum.textContent = data.id + ".";
+                    link.appendChild(spanNum);
+                }
+                
                 const spanTitle = document.createElement('span');
                 spanTitle.textContent = data.title;
 
-                link.appendChild(spanNum);
                 link.appendChild(spanTitle);
                 
                 // Evento para mostrar este contenido en concreto
