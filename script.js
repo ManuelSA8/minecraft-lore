@@ -86,7 +86,16 @@ async function loadLore() {
                 const li = document.createElement('li');
                 const link = document.createElement('a');
                 link.href = "#";
-                link.textContent = data.title;
+
+                const spanNum = document.createElement('span');
+                spanNum.className = 'nav-num';
+                spanNum.textContent = data.id + ".";
+
+                const spanTitle = document.createElement('span');
+                spanTitle.textContent = data.title;
+
+                link.appendChild(spanNum);
+                link.appendChild(spanTitle);
                 
                 // Evento para mostrar este contenido en concreto
                 link.addEventListener('click', (event) => {

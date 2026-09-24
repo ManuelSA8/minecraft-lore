@@ -61,7 +61,7 @@ body {
 
 /* Panel Izquierdo */
 #sidebar {
-    width: 300px;
+    width: 370;
     border-right: 4px solid #3A2318;
     padding: 30px 20px;
     background-color: #e5c48b;
@@ -123,6 +123,11 @@ body {
     font-size: 1.5rem;
     display: block;
     transition: color 0.2s;
+    display: flex;
+}
+
+.nav-num {
+    min-width: 33px;
 }
 
 .index-category a:hover {
