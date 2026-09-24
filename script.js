@@ -9,7 +9,9 @@ const loreConfig = [
             './chapters/chap1.json',
             './chapters/chap2.json',
             './chapters/chap3.json',
-            './chapters/chap4.json'
+            './chapters/chap4.json',
+            './chapters/chap5.json',
+            './chapters/chap6.json'
         ]
     },
     {
